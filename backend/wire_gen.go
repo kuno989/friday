@@ -8,6 +8,7 @@ package backend
 
 import (
 	"context"
+	"github.com/kuno989/friday/backend/pkg"
 	"github.com/spf13/viper"
 )
 
@@ -18,7 +19,16 @@ func InitializeServer(ctx context.Context, cfg *viper.Viper) (*Server, func(), e
 	if err != nil {
 		return nil, nil, err
 	}
-	server := NewServer(serverConfig)
+	mongoConfig, err := pkg.ProvideMongoConfig(cfg)
+	if err != nil {
+		return nil, nil, err
+	}
+	mongo, cleanup, err := pkg.NewMongo(ctx, mongoConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+	server := NewServer(serverConfig, mongo)
 	return server, func() {
+		cleanup()
 	}, nil
 }

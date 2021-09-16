@@ -1,9 +1,8 @@
 package backend
 
 import (
-	"fmt"
 	"github.com/google/wire"
-	"github.com/kuno989/friday/backend/handlers/files"
+	"github.com/kuno989/friday/backend/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 
@@ -18,26 +17,28 @@ var (
 )
 
 type ServerConfig struct {
-	Debug bool
-	AllowedOrigins []string
+	Debug bool `mapstructure:"debug"`
+	AllowedOrigins []string `mapstructure:"allowed_origins"`
+	MaxFileSize int64 `mapstructure:"maxFileSize"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {
 	sc := DefaultServerConfig
 	err := cfg.Unmarshal(&sc)
-	fmt.Println(sc)
 	return sc, err
 }
 
 type Server struct {
 	*echo.Echo
 	Config ServerConfig
+	ms *pkg.Mongo
 }
 
-func NewServer(cfg ServerConfig) * Server {
+func NewServer(cfg ServerConfig, ms *pkg.Mongo) * Server {
 	s := &Server{
 		Echo:   echo.New(),
 		Config: cfg,
+		ms: ms,
 	}
 	s.HideBanner = true
 	s.HidePort = true
@@ -62,7 +63,7 @@ func NewServer(cfg ServerConfig) * Server {
 
 func (s *Server) RegisterHandlers() {
 	api := s.Group("/api")
-	api.GET("/files", files.FileGetHandler)
-	api.POST("/files", files.UploadFile)
-	api.PUT("/files", files.FileGetHandler)
+	api.GET("/files", s.FileGetHandler)
+	api.POST("/files", s.UploadFile)
+	api.PUT("/files", s.FileGetHandler)
 }

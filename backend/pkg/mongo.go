@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/google/wire"
+	"github.com/kuno989/friday/backend/schema"
+	mongoSchema "github.com/kuno989/friday/backend/schema/mongo"
 	"github.com/spf13/viper"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"time"
@@ -12,16 +15,18 @@ import (
 
 var (
 	DefaultMongoConfig = MongoConfig{
-		URI: "mongodb://localhost",
-		DB: "friday",
-		BcryptCost: 10,
+		URI:            "mongodb://localhost",
+		DB:             "",
+		FileCollection: "",
+		BcryptCost:     10,
 	}
 	MongoProviderSet = wire.NewSet(NewMongo, ProvideMongoConfig)
 )
+
 type MongoConfig struct {
-	URI string `mapstructure:"uri"`
-	DB string  `mapstructure:"db"`
-	//UserCollection string
+	URI            string `mapstructure:"uri"`
+	DB             string `mapstructure:"db"`
+	FileCollection string `mapstructure:"file_collection"`
 	//DatabaseCollection string
 	BcryptCost int
 }
@@ -37,7 +42,7 @@ type Mongo struct {
 	client *mongo.Client
 }
 
-func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error){
+func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error) {
 	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.URI))
 	if err != nil {
 		return nil, nil, err
@@ -54,4 +59,31 @@ func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error){
 		Config: cfg,
 		client: client,
 	}, cleanup, nil
+}
+
+func (m *Mongo) FileSearchBySHA256(ctx context.Context, sha256 string) (schema.File, error) {
+	coll := m.client.Database(m.Config.DB).Collection(m.Config.FileCollection)
+	var file schema.File
+	err := coll.FindOne(ctx, bson.M{mongoSchema.FileSha256Key: sha256}).Decode(&file)
+	return file, err
+}
+
+func (m *Mongo) CreateFile(ctx context.Context, uploadFile schema.File) (schema.File, error) {
+	coll := m.client.Database(m.Config.DB).Collection(m.Config.FileCollection)
+	_, err := coll.InsertOne(ctx, uploadFile)
+	if err != nil {
+		return schema.File{}, nil
+	}
+	return uploadFile, nil
+}
+
+func (m *Mongo) UpdateFile(ctx context.Context, uploadFile schema.File) (schema.File, error) {
+	coll := m.client.Database(m.Config.DB).Collection(m.Config.FileCollection)
+	_, err := coll.UpdateOne(ctx, bson.M{"sha256": uploadFile.Sha256}, bson.M{
+		"$set": uploadFile,
+	})
+	if err != nil {
+		return schema.File{}, nil
+	}
+	return uploadFile, nil
 }

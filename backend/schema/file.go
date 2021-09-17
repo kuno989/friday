@@ -1,6 +1,8 @@
 package schema
 
-import "time"
+import (
+	"time"
+)
 
 type FileResponse struct {
 	Sha256      string `json:"sha256,omitempty"`
@@ -10,14 +12,14 @@ type FileResponse struct {
 	Description string `json:"description,omitempty"`
 }
 
-type submission struct {
+type Submission struct {
 	Date     *time.Time `json:"date,omitempty"`
 	Filename string     `json:"filename,omitempty"`
 	Country  string     `json:"country,omitempty"`
 }
 
 type File struct {
-	FileId           string                 `json:"file_id,omitempty"`
+	FileKey          string                 `json:"file_key,omitempty"`
 	Md5              string                 `json:"md5,omitempty"`
 	Sha1             string                 `json:"sha1,omitempty"`
 	Sha256           string                 `json:"sha256,omitempty"`
@@ -33,7 +35,7 @@ type File struct {
 	FirstSubmission  *time.Time             `json:"first_submission,omitempty"`
 	LastSubmission   *time.Time             `json:"last_submission,omitempty"`
 	LastScanned      *time.Time             `json:"last_scanned,omitempty"`
-	Submissions      []submission           `json:"submissions,omitempty"`
+	Submissions      []Submission           `json:"submissions,omitempty"`
 	SubmissionsCount int64                  `json:"submissions_count"`
 	// Strings         []stringStruct         `json:"strings,omitempty"`
 	MultiAV map[string]interface{} `json:"multiav,omitempty"`

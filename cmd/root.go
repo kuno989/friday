@@ -9,9 +9,9 @@ import (
 var (
 	cfgFile string
 	rootCmd = &cobra.Command{
-		Use: "logger",
-		Short: "logger",
-		PersistentPreRun: func(cmd *cobra.Command, args []string){
+		Use:   "fridayEngine",
+		Short: "fridayEngine",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if cfgFile != "" {
 				viper.SetConfigFile(cfgFile)
 			} else {

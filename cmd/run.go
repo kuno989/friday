@@ -13,15 +13,14 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
 )
 
 var (
 	runCmd = &cobra.Command{
-		Use: "run",
+		Use:     "run",
 		Aliases: []string{"runserver"},
-		Short: "Run web api server",
-		Run: func(cmd *cobra.Command, args []string){
+		Short:   "Run fridayEngine web api server",
+		Run: func(cmd *cobra.Command, args []string) {
 			s, cleanup, err := backend.InitializeServer(context.Background(), viper.GetViper())
 			if err != nil {
 				logrus.WithError(err).Fatal("initialize server")
@@ -29,11 +28,11 @@ var (
 			defer cleanup()
 			s.Logger.SetLevel(log.DEBUG)
 
-			go func(){
+			go func() {
 				bindAddr := viper.GetString("webserver_port")
 				logrus.Infof("server is running on http://localhost%s", bindAddr)
 				if err := s.Start(bindAddr); err != nil {
-					if !errors.Is(err, http.ErrServerClosed){
+					if !errors.Is(err, http.ErrServerClosed) {
 						logrus.WithError(err).Fatal("start server")
 					}
 				}
@@ -41,7 +40,7 @@ var (
 
 			sig := make(chan os.Signal, 1)
 			signal.Notify(sig, os.Interrupt)
-			<- sig
+			<-sig
 			signal.Reset(os.Interrupt)
 			logrus.Info("shutting down server")
 			ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)

@@ -12,23 +12,24 @@ import (
 	"net/http"
 )
 
-
 var (
 	DefaultMinioConfig = MinioConfig{
-		URI: "localhost:9000",
+		URI:       "localhost:9000",
 		AccessKey: "",
 		SecretKey: "",
-		Bucket: "malwares",
+		Bucket:    "malwares",
 	}
 	MinioProviderSet = wire.NewSet(NewMinio, ProvideMinioConfig)
 )
+
 type MinioConfig struct {
-	URI string `mapstructure:"endpoint"`
+	URI       string `mapstructure:"endpoint"`
 	AccessKey string `mapstructure:"accessKey"`
 	SecretKey string `mapstructure:"secretKey"`
-	Bucket string `mapstructure:"bucket"`
+	Bucket    string `mapstructure:"bucket"`
 }
-func ProvideMinioConfig(cfg *viper.Viper) (MinioConfig, error){
+
+func ProvideMinioConfig(cfg *viper.Viper) (MinioConfig, error) {
 	minio := DefaultMinioConfig
 	err := cfg.UnmarshalKey("minio", &minio)
 	return minio, err
@@ -61,12 +62,11 @@ func (m Minio) Upload(ctx context.Context, fileInfo *multipart.FileHeader) (mini
 	content, err := ioutil.ReadAll(file)
 	contentType := http.DetectContentType(content)
 	buf := bytes.NewBuffer(content)
-	info, err := m.Client.PutObject(ctx, m.Config.Bucket, fileInfo.Filename, buf, fileInfo.Size, miniogo.PutObjectOptions{
+	info, err := m.Client.PutObject(ctx, m.Config.Bucket, "sample/"+fileInfo.Filename, buf, fileInfo.Size, miniogo.PutObjectOptions{
 		ContentType: contentType,
 	})
 	if err != nil {
 		return miniogo.UploadInfo{}, err
 	}
-
 	return info, nil
 }

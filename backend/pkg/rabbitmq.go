@@ -8,14 +8,14 @@ import (
 
 var (
 	DefaultRabbitMqConfig = RabbitMqConfig{
-		URI: "amqp://guest:guest@localhost:5672/",
+		URI:           "amqp://guest:guest@localhost:5672/",
 		FileScanQueue: "fileScan",
 	}
 	RabbitmqProviderSet = wire.NewSet(NewRabbitMq, ProvideRabbitMqConfig)
 )
 
 type RabbitMqConfig struct {
-	URI string `mapstructure:"uri"`
+	URI           string `mapstructure:"uri"`
 	FileScanQueue string `mapstructure:"fileScan"`
 }
 
@@ -30,7 +30,7 @@ type RabbitMq struct {
 	Client *amqp.Connection
 }
 
-func NewRabbitMq(cfg RabbitMqConfig) (*RabbitMq, func(), error){
+func NewRabbitMq(cfg RabbitMqConfig) (*RabbitMq, func(), error) {
 	client, err := amqp.Dial(cfg.URI)
 	if err != nil {
 		return nil, nil, err

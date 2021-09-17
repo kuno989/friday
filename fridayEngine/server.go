@@ -17,9 +17,7 @@ var (
 )
 
 type ServerConfig struct {
-	Debug          bool     `mapstructure:"debug"`
-	AllowedOrigins []string `mapstructure:"allowed_origins"`
-	MaxFileSize    int64    `mapstructure:"maxFileSize"`
+	Debug bool `mapstructure:"debug"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {

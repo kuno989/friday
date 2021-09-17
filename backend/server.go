@@ -32,13 +32,15 @@ type Server struct {
 	*echo.Echo
 	Config ServerConfig
 	ms *pkg.Mongo
+	rb *pkg.RabbitMq
 }
 
-func NewServer(cfg ServerConfig, ms *pkg.Mongo) * Server {
+func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq) * Server {
 	s := &Server{
 		Echo:   echo.New(),
 		Config: cfg,
 		ms: ms,
+		rb: rb,
 	}
 	s.HideBanner = true
 	s.HidePort = true

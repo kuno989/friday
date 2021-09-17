@@ -35,6 +35,7 @@ func (s *Server) UploadFile(c echo.Context) error {
 		})
 	}
 	defer file.Close()
+
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, schema.FileResponse{
@@ -45,7 +46,12 @@ func (s *Server) UploadFile(c echo.Context) error {
 		})
 	}
 	sha256 := pkg.NewSHA256(content)
-	fmt.Println(sha256)
+
+	ch, err := s.rb.Client.Channel()
+	if err != nil {
+		fmt.Println("rb channel error", err)
+	}
+	fmt.Println(sha256,ch)
 	return c.JSON(http.StatusBadRequest, "Filters not allowed") // 수정예정
 }
 

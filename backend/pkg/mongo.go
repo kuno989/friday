@@ -45,7 +45,7 @@ func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error){
 	ctxTime, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	if err := client.Connect(ctxTime); err != nil {
-		return nil, nil, fmt.Errorf("connect: %w", err)
+		return nil, nil, fmt.Errorf("connect mongo: %w", err)
 	}
 	cleanup := func() {
 		_ = client.Disconnect(ctx)
@@ -54,7 +54,4 @@ func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error){
 		Config: cfg,
 		client: client,
 	}, cleanup, nil
-}
-func (m *Mongo) EnsureIndexes(ctx context.Context) error {
-	return nil
 }

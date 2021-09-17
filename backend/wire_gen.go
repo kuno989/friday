@@ -27,8 +27,19 @@ func InitializeServer(ctx context.Context, cfg *viper.Viper) (*Server, func(), e
 	if err != nil {
 		return nil, nil, err
 	}
-	server := NewServer(serverConfig, mongo)
+	rabbitMqConfig, err := pkg.ProvideRabbitMqConfig(cfg)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	rabbitMq, cleanup2, err := pkg.NewRabbitMq(rabbitMqConfig)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	server := NewServer(serverConfig, mongo, rabbitMq)
 	return server, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }

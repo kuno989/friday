@@ -12,5 +12,5 @@ import (
 )
 
 func InitializeServer(ctx context.Context, cfg *viper.Viper) (*Server, func(), error) {
-	panic(wire.Build(ServerProviderSet, pkg.MongoProviderSet))
+	panic(wire.Build(ServerProviderSet, pkg.MongoProviderSet, pkg.RabbitmqProviderSet))
 }

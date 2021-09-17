@@ -137,7 +137,7 @@ func (s *Server) UploadFile(c echo.Context) error {
 			})
 		}
 		uploadFile.Submissions = append(uploadFile.Submissions, submission)
-		_, err = s.ms.CreateFile(c.Request().Context(), uploadFile)
+		_, err = s.ms.FileCreate(c.Request().Context(), uploadFile)
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
 				Sha256:      sha256,
@@ -164,7 +164,7 @@ func (s *Server) UploadFile(c echo.Context) error {
 	fileData.LastSubmission = &uploadDate
 	fileData.SubmissionsCount = fileData.SubmissionsCount + 1
 
-	response, err := s.ms.UpdateFile(c.Request().Context(), fileData)
+	response, err := s.ms.FileUpdate(c.Request().Context(), fileData)
 	if err != nil {
 		return c.JSON(http.StatusOK, schema.FileResponse{
 			Sha256:      sha256,

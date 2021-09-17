@@ -68,7 +68,7 @@ func (m *Mongo) FileSearch(ctx context.Context, sha256 string) (schema.File, err
 	return file, err
 }
 
-func (m *Mongo) CreateFile(ctx context.Context, uploadFile schema.File) (schema.File, error) {
+func (m *Mongo) FileCreate(ctx context.Context, uploadFile schema.File) (schema.File, error) {
 	coll := m.client.Database(m.Config.DB).Collection(m.Config.FileCollection)
 	_, err := coll.InsertOne(ctx, uploadFile)
 	if err != nil {
@@ -77,7 +77,7 @@ func (m *Mongo) CreateFile(ctx context.Context, uploadFile schema.File) (schema.
 	return uploadFile, nil
 }
 
-func (m *Mongo) UpdateFile(ctx context.Context, uploadFile schema.File) (schema.File, error) {
+func (m *Mongo) FileUpdate(ctx context.Context, uploadFile schema.File) (schema.File, error) {
 	coll := m.client.Database(m.Config.DB).Collection(m.Config.FileCollection)
 	_, err := coll.UpdateOne(ctx, bson.M{"sha256": uploadFile.Sha256}, bson.M{
 		"$set": uploadFile,

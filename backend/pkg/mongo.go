@@ -61,7 +61,7 @@ func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error) {
 	}, cleanup, nil
 }
 
-func (m *Mongo) FileSearchBySHA256(ctx context.Context, sha256 string) (schema.File, error) {
+func (m *Mongo) FileSearch(ctx context.Context, sha256 string) (schema.File, error) {
 	coll := m.client.Database(m.Config.DB).Collection(m.Config.FileCollection)
 	var file schema.File
 	err := coll.FindOne(ctx, bson.M{mongoSchema.FileSha256Key: sha256}).Decode(&file)

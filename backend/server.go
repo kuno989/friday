@@ -10,16 +10,16 @@ import (
 )
 
 var (
-	DefaultServerConfig =  ServerConfig{
+	DefaultServerConfig = ServerConfig{
 		Debug: true,
 	}
 	ServerProviderSet = wire.NewSet(NewServer, ProvideServerConfig)
 )
 
 type ServerConfig struct {
-	Debug bool `mapstructure:"debug"`
+	Debug          bool     `mapstructure:"debug"`
 	AllowedOrigins []string `mapstructure:"allowed_origins"`
-	MaxFileSize int64 `mapstructure:"maxFileSize"`
+	MaxFileSize    int64    `mapstructure:"maxFileSize"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {
@@ -31,18 +31,18 @@ func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {
 type Server struct {
 	*echo.Echo
 	Config ServerConfig
-	ms *pkg.Mongo
-	rb *pkg.RabbitMq
-	minio *pkg.Minio
+	ms     *pkg.Mongo
+	rb     *pkg.RabbitMq
+	minio  *pkg.Minio
 }
 
-func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Minio) * Server {
+func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Minio) *Server {
 	s := &Server{
 		Echo:   echo.New(),
 		Config: cfg,
-		ms: ms,
-		rb: rb,
-		minio: minio,
+		ms:     ms,
+		rb:     rb,
+		minio:  minio,
 	}
 	s.HideBanner = true
 	s.HidePort = true
@@ -67,7 +67,7 @@ func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Min
 
 func (s *Server) RegisterHandlers() {
 	api := s.Group("/api")
-	api.GET("/files", s.FileGetHandler)
-	api.POST("/files", s.UploadFile)
-	api.PUT("/files", s.FileGetHandler)
+	api.GET("/file/:sha256", s.FileGetHandler)
+	api.POST("/file", s.UploadFile)
+	api.PUT("/file", s.FileGetHandler)
 }

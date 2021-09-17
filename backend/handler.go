@@ -11,8 +11,37 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"io/ioutil"
 	"net/http"
+	"regexp"
+	"strings"
 	"time"
 )
+
+const (
+	regex = "^[a-f0-9]{64}$"
+)
+
+func (s *Server) FileGetHandler(c echo.Context) error {
+	sha256 := c.Param("sha256")
+	sha256 = strings.ToLower(sha256)
+	matched, _ := regexp.MatchString(regex, sha256)
+	if !matched {
+		return c.JSON(http.StatusBadRequest, schema.FileResponse{
+			Message:     "sha256 포멧이 아닙니다",
+			Description: "잘못된 hash 요청입니다 : " + sha256,
+		})
+	}
+	file, err := s.ms.FileSearch(c.Request().Context(), sha256)
+	if err != nil {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			return c.JSON(http.StatusOK, schema.FileResponse{
+				Sha256:      sha256,
+				Message:     err.Error(),
+				Description: "파일을 찾을 수 없습니다",
+			})
+		}
+	}
+	return c.JSON(http.StatusOK, file)
+}
 
 func (s *Server) UploadFile(c echo.Context) error {
 	responseFile, err := c.FormFile("file")
@@ -51,10 +80,10 @@ func (s *Server) UploadFile(c echo.Context) error {
 		})
 	}
 	sha256 := pkg.NewSHA256(content)
-	fileData, err := s.ms.FileSearchBySHA256(c.Request().Context(), sha256)
+	fileData, err := s.ms.FileSearch(c.Request().Context(), sha256)
 	if err != nil {
 		if !errors.Is(err, mongo.ErrNoDocuments) {
-			return c.JSON(http.StatusOK, schema.FileResponse{
+			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
 				Sha256:      sha256,
 				Message:     err.Error(),
 				FileName:    responseFile.Filename,
@@ -110,7 +139,7 @@ func (s *Server) UploadFile(c echo.Context) error {
 		uploadFile.Submissions = append(uploadFile.Submissions, submission)
 		_, err = s.ms.CreateFile(c.Request().Context(), uploadFile)
 		if err != nil {
-			return c.JSON(http.StatusOK, schema.FileResponse{
+			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
 				Sha256:      sha256,
 				Message:     err.Error(),
 				FileName:    responseFile.Filename,
@@ -146,8 +175,4 @@ func (s *Server) UploadFile(c echo.Context) error {
 		})
 	}
 	return c.JSON(http.StatusOK, response)
-}
-
-func (s *Server) FileGetHandler(c echo.Context) error {
-	return c.JSON(http.StatusBadRequest, "Filters not allowed")
 }

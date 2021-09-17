@@ -32,5 +32,6 @@ func Execute() error {
 
 func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is logger.yml)")
-	rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(runBackend)
+	rootCmd.AddCommand(runFridayEngine)
 }

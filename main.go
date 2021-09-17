@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func main(){
+func main() {
 	log.SetLevel(log.DebugLevel)
 	if err := cmd.Execute(); err != nil {
 		log.Fatal(err)

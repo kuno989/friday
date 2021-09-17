@@ -1,6 +1,7 @@
 package backend
 
 import (
+	"context"
 	"fmt"
 	"github.com/kuno989/friday/backend/pkg"
 	"github.com/kuno989/friday/backend/schema"
@@ -46,12 +47,22 @@ func (s *Server) UploadFile(c echo.Context) error {
 		})
 	}
 	sha256 := pkg.NewSHA256(content)
+	ctx := context.Background()
 
-	ch, err := s.rb.Client.Channel()
+	info, err := s.minio.Upload(ctx, responseFile)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, schema.FileResponse{
+			Message:     "파일 업로드 실패",
+			Description: "Internal error",
+			FileName:    responseFile.Filename,
+			FileSize:    responseFile.Size,
+		})
+	}
+	ch, err := s.rb.Channel()
 	if err != nil {
 		fmt.Println("rb channel error", err)
 	}
-	fmt.Println(sha256,ch)
+	fmt.Println(info,sha256,ch)
 	return c.JSON(http.StatusBadRequest, "Filters not allowed") // 수정예정
 }
 

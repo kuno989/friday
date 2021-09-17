@@ -44,10 +44,10 @@ func NewRabbitMq(cfg RabbitMqConfig) (*RabbitMq, func(), error){
 	}, cleanup, nil
 }
 
-//func (r *RabbitMq) Channel() error {
-//	if r.client == nil {
-//		if err := r.client.Channel(); err != nil {
-//
-//		}
-//	}
-//}
+func (r *RabbitMq) Channel() (*amqp.Channel, error) {
+	ch, err := r.Client.Channel()
+	if err != nil {
+		return nil, err
+	}
+	return ch, nil
+}

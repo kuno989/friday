@@ -37,7 +37,19 @@ func InitializeServer(ctx context.Context, cfg *viper.Viper) (*Server, func(), e
 		cleanup()
 		return nil, nil, err
 	}
-	server := NewServer(serverConfig, mongo, rabbitMq)
+	minioConfig, err := pkg.ProvideMinioConfig(cfg)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	minio, err := pkg.NewMinio(minioConfig)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	server := NewServer(serverConfig, mongo, rabbitMq, minio)
 	return server, func() {
 		cleanup2()
 		cleanup()

@@ -7,6 +7,7 @@ import (
 	"github.com/kuno989/friday/backend/pkg"
 	"github.com/kuno989/friday/backend/schema"
 	"github.com/labstack/echo/v4"
+	"github.com/streadway/amqp"
 	"go.mongodb.org/mongo-driver/mongo"
 	"io/ioutil"
 	"net/http"
@@ -63,7 +64,6 @@ func (s *Server) UploadFile(c echo.Context) error {
 		}
 	}
 	if errors.Is(err, mongo.ErrNoDocuments) {
-
 		ctx := context.Background()
 		uploadedInfo, err := s.minio.Upload(ctx, responseFile)
 		if err != nil {
@@ -89,7 +89,23 @@ func (s *Server) UploadFile(c echo.Context) error {
 		}
 		ch, err := s.rb.Channel()
 		if err != nil {
-			fmt.Println("rabbitmq channel error", err)
+			s.Logger.Error("rabbitmq channel error", err)
+		}
+		defer ch.Close()
+		q, err := ch.QueueDeclare(s.rb.Config.FileScanQueue, false, false, false, false, nil)
+		if err != nil {
+			s.Logger.Error("rabbitmq queue error", err)
+		}
+		if err = ch.Publish("", q.Name, false, false, amqp.Publishing{
+			ContentType: "application/json",
+			Body:        []byte(fmt.Sprintf(`{"minio_object_key":"%s", "sha256":"%s"}`, uploadedInfo.Key, sha256)),
+		}); err != nil {
+			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
+				Message:     "분석 작업 요청 실패",
+				Description: "Internal error",
+				FileName:    responseFile.Filename,
+				Sha256:      sha256,
+			})
 		}
 		uploadFile.Submissions = append(uploadFile.Submissions, submission)
 		_, err = s.ms.CreateFile(c.Request().Context(), uploadFile)
@@ -102,7 +118,6 @@ func (s *Server) UploadFile(c echo.Context) error {
 				Description: "작업 중 에러가 발생하였습니다",
 			})
 		}
-		fmt.Println(ch)
 		return c.JSON(http.StatusOK, schema.FileResponse{
 			Sha256:      sha256,
 			Message:     "Success!",

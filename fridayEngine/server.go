@@ -11,6 +11,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
+	"github.com/terra-farm/go-virtualbox"
 	"os"
 	"path/filepath"
 	"time"
@@ -75,5 +76,12 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	}
 	file.Close()
 	logrus.Debugf("file downloaded to %s", filePath)
+	machine, err := virtualbox.GetMachine("win7")
+	if err != nil {
+		logrus.Error("can not find machine", err)
+	}
+
+	logrus.Debugf("%s sandbox found!", machine.Name)
+	logrus.Debugf("cpu %v, memory %v", machine.CPUs, machine.Memory)
 	return nil
 }

@@ -42,6 +42,7 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/streadway/amqp v1.0.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
+	github.com/terra-farm/go-virtualbox v0.0.4 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/valyala/fasttemplate v1.2.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect

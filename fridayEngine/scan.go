@@ -22,13 +22,22 @@ func (s *Server) defaultScan(path string) schema.Result {
 	res.Sha256 = result.Sha256
 	res.Sha512 = result.Sha512
 	res.Crc32 = result.Crc32
+
 	logrus.Infof("file hashing finished ")
 	packerRes, err := packer.Scan(path)
 	if err != nil {
 		logrus.Errorf("packer scan failed with %s", err)
 	}
+
+	n := 10
+	asciiStrings := utils.GetASCIIStrings(b, n)
+	wideStrings := utils.GetUnicodeStrings(b, n)
+	asmStrings := utils.GetAsmStrings(b)
+	fmt.Println(asciiStrings, wideStrings, asmStrings)
+
+	res.Packer = packerRes
 	var tags []string
-	for _, out := range packerRes {
+	for _, out := range res.Packer {
 		fmt.Println(out)
 		if strings.Contains(out, "packer") ||
 			strings.Contains(out, "protector") ||
@@ -42,6 +51,8 @@ func (s *Server) defaultScan(path string) schema.Result {
 			}
 		}
 	}
+	logrus.Infof("tags extraction finish")
+
 	//fmt.Println("tags", tags)
 	//file, err := s.parser(path)
 	//if err != nil {

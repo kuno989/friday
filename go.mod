@@ -12,6 +12,7 @@ require (
 )
 
 require (
+	github.com/bnagy/gapstone v0.0.0-20190828052830-ede92aaeaba7 // indirect
 	github.com/dustin/go-humanize v1.0.0 // indirect
 	github.com/edsrzf/mmap-go v1.0.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect

@@ -11,7 +11,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
-	"github.com/terra-farm/go-virtualbox"
 	"os"
 	"path/filepath"
 	"time"
@@ -53,35 +52,45 @@ func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Min
 }
 
 func (s *Server) AmqpHandler(msg amqp.Delivery) error {
-	if len(msg.Body) == 0 {
-		return errors.New("Delivery Body is length 0")
-	}
 	body := bytes.ReplaceAll(msg.Body, []byte("NaN"), []byte("0"))
 	var resp rabbitmq.ResponseObject
 	if err := json.Unmarshal(body, &resp); err != nil {
-		logrus.Error("failed to parse message body", err)
+		return errors.New("ailed to parse message body")
 		if err := msg.Reject(false); err != nil {
-			logrus.Error("failed to reject message", err)
+			logrus.Errorf("failed to reject message %s", err)
 		}
 	}
 	filePath := filepath.Join(s.Config.TempPath, resp.Sha256)
 	file, err := os.Create(filePath)
 	if err != nil {
-		logrus.Error("failed creating file", err)
+		logrus.Errorf("failed creating file %s", err)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 	if err := s.minio.Download(ctx, resp.MinioObjectKey, file); err != nil {
-		logrus.Error("failed downloading file", err)
+		logrus.Errorf("failed downloading file %s", err)
 	}
 	file.Close()
-	logrus.Debugf("file downloaded to %s", filePath)
-	machine, err := virtualbox.GetMachine("win7")
-	if err != nil {
-		logrus.Error("can not find machine", err)
-	}
+	logrus.Infof("file downloaded to %s", filePath)
+	s.defaultScan(filePath)
 
-	logrus.Debugf("%s sandbox found!", machine.Name)
-	logrus.Debugf("cpu %v, memory %v", machine.CPUs, machine.Memory)
+	//machine, err := virtualbox.GetMachine("win7")
+	//if err != nil {
+	//	logrus.Errorf("can not find machine %s", err)
+	//}
+	//
+	//logrus.Infof("%s sandbox found", machine.Name)
+	//logrus.Infof("cpu %v, memory %v", machine.CPUs, machine.Memory)
+	//
+	//if err := machine.Start(); err != nil {
+	//	logrus.Errorf("machine start failure %s", err)
+	//}
+	//logrus.Infof("%s sandbox start", machine.Name)
+
+	//if err := machine.Save(); err != nil {
+	//	logrus.Errorf("machine save failure %s", err)
+	//}
+	//logrus.Infof("%s sandbox saved", machine.Name)
+
 	return nil
 }

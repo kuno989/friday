@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/google/wire"
 	"github.com/kuno989/friday/backend/pkg"
 	"github.com/kuno989/friday/backend/schema/rabbitmq"
@@ -72,13 +73,13 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	}
 	file.Close()
 	logrus.Infof("file downloaded to %s", filePath)
-	s.defaultScan(filePath)
+	scanResult := s.defaultScan(filePath)
+	fmt.Println(scanResult)
 
 	//machine, err := virtualbox.GetMachine("win7")
 	//if err != nil {
 	//	logrus.Errorf("can not find machine %s", err)
 	//}
-	//
 	//logrus.Infof("%s sandbox found", machine.Name)
 	//logrus.Infof("cpu %v, memory %v", machine.CPUs, machine.Memory)
 	//

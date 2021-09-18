@@ -1,10 +1,14 @@
 package fridayEngine
 
 import (
+	"fmt"
 	"github.com/kuno989/friday/backend/schema"
 	"github.com/kuno989/friday/fridayEngine/utils"
+	"github.com/kuno989/friday/fridayEngine/utils/packer"
+	"github.com/saferwall/pe"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
+	"strings"
 )
 
 func (s *Server) defaultScan(path string) schema.Result {
@@ -19,5 +23,56 @@ func (s *Server) defaultScan(path string) schema.Result {
 	res.Sha512 = result.Sha512
 	res.Crc32 = result.Crc32
 	logrus.Infof("file hashing finished ")
+	packerRes, err := packer.Scan(path)
+	if err != nil {
+		logrus.Errorf("packer scan failed with %s", err)
+	}
+	var tags []string
+	for _, out := range packerRes {
+		fmt.Println(out)
+		if strings.Contains(out, "packer") ||
+			strings.Contains(out, "protector") ||
+			strings.Contains(out, "compiler") ||
+			strings.Contains(out, "installer") ||
+			strings.Contains(out, "library") {
+			for sig, tag := range schema.SigMap {
+				if strings.Contains(out, sig) {
+					tags = append(tags, tag)
+				}
+			}
+		}
+	}
+	//fmt.Println("tags", tags)
+	//file, err := s.parser(path)
+	//if err != nil {
+	//	logrus.Errorf("pe parsing failed %s", err)
+	//}
+	//var tags []string
+	//if file.IsEXE() {
+	//	tags = append(tags, "exe")
+	//} else if file.IsDriver() {
+	//	tags = append(tags, "sys")
+	//} else if file.IsDLL() {
+	//	tags = append(tags, "dll")
+	//}
+	//res.Tags = tags
+
 	return res
+}
+
+func (s *Server) parser(path string) (*pe.File, error) {
+	var err error
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+	opts := pe.Options{SectionEntropy: true}
+	f, err := pe.New(path, &opts)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	err = f.Parse()
+	return f, err
 }

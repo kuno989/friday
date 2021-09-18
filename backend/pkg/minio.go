@@ -7,6 +7,7 @@ import (
 	miniogo "github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/spf13/viper"
+	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -69,4 +70,20 @@ func (m Minio) Upload(ctx context.Context, fileInfo *multipart.FileHeader) (mini
 		return miniogo.UploadInfo{}, err
 	}
 	return info, nil
+}
+
+func (m Minio) Download(ctx context.Context, key string, file io.Writer) error {
+	reader, err := m.Client.GetObject(ctx, m.Config.Bucket, key, miniogo.GetObjectOptions{})
+	if err != nil {
+		return err
+	}
+	stat, err := reader.Stat()
+	if err != nil {
+		return err
+	}
+	_, err = io.CopyN(file, reader, stat.Size)
+	if err != nil {
+		return err
+	}
+	return nil
 }

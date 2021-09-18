@@ -1,12 +1,19 @@
 package fridayEngine
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/google/wire"
 	"github.com/kuno989/friday/backend/pkg"
+	"github.com/kuno989/friday/backend/schema/rabbitmq"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"github.com/streadway/amqp"
+	"os"
+	"path/filepath"
+	"time"
 )
 
 var (
@@ -17,7 +24,8 @@ var (
 )
 
 type ServerConfig struct {
-	Debug bool `mapstructure:"debug"`
+	Debug    bool   `mapstructure:"debug"`
+	TempPath string `mapstructure:"volume"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {
@@ -47,7 +55,25 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	if len(msg.Body) == 0 {
 		return errors.New("Delivery Body is length 0")
 	}
-	msgBody := string(msg.Body)
-	fmt.Println(msgBody)
+	body := bytes.ReplaceAll(msg.Body, []byte("NaN"), []byte("0"))
+	var resp rabbitmq.ResponseObject
+	if err := json.Unmarshal(body, &resp); err != nil {
+		logrus.Error("failed to parse message body", err)
+		if err := msg.Reject(false); err != nil {
+			logrus.Error("failed to reject message", err)
+		}
+	}
+	filePath := filepath.Join(s.Config.TempPath, resp.Sha256)
+	file, err := os.Create(filePath)
+	if err != nil {
+		logrus.Error("failed creating file", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+	if err := s.minio.Download(ctx, resp.MinioObjectKey, file); err != nil {
+		logrus.Error("failed downloading file", err)
+	}
+	file.Close()
+	logrus.Debugf("file downloaded to %s", filePath)
 	return nil
 }

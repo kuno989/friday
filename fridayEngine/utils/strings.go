@@ -8,9 +8,29 @@ import (
 	"github.com/bnagy/gapstone"
 	"github.com/sirupsen/logrus"
 	"regexp"
+	"strings"
 	"unicode/utf16"
 	"unicode/utf8"
 )
+
+func SliceContainsString(a string, list []string) bool {
+	for _, b := range list {
+		if strings.Contains(b, a) {
+			return true
+		}
+	}
+	return false
+}
+
+func UniqueSlice(slice []string) []string {
+	cleaned := []string{}
+	for _, value := range slice {
+		if !StringInSlice(value, cleaned) {
+			cleaned = append(cleaned, value)
+		}
+	}
+	return cleaned
+}
 
 func decodeUTF16(b []byte) (string, error) {
 

@@ -5,9 +5,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/google/wire"
 	"github.com/kuno989/friday/backend/pkg"
+	"github.com/kuno989/friday/backend/schema"
 	"github.com/kuno989/friday/backend/schema/rabbitmq"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -25,8 +25,10 @@ var (
 )
 
 type ServerConfig struct {
-	Debug    bool   `mapstructure:"debug"`
-	TempPath string `mapstructure:"volume"`
+	Debug         bool   `mapstructure:"debug"`
+	TempPath      string `mapstructure:"volume"`
+	URI           string `mapstructure:"uri"`
+	WebserverPort string `mapstructure:"webserver_port"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {
@@ -41,6 +43,12 @@ type Server struct {
 	ms     *pkg.Mongo
 	minio  *pkg.Minio
 }
+
+const (
+	queued     = iota
+	processing = iota
+	finished   = iota
+)
 
 func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Minio) *Server {
 	s := &Server{
@@ -73,8 +81,20 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	}
 	file.Close()
 	logrus.Infof("file downloaded to %s", filePath)
-	scanResult := s.defaultScan(filePath)
-	fmt.Println(scanResult)
+
+	res := schema.Result{}
+	res.Status = processing
+
+	s.defaultScan(filePath, &res)
+	var buff []byte
+	if buff, err = json.Marshal(res); err != nil {
+		logrus.Errorf("Failed to json marshall object: %v ", err)
+	}
+	s.updateDocument(resp.Sha256, buff)
+
+	res.Status = finished
+	now := time.Now().UTC()
+	res.LastScanned = &now
 
 	//machine, err := virtualbox.GetMachine("win7")
 	//if err != nil {

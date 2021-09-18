@@ -2,6 +2,7 @@ package backend
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/kuno989/friday/backend/pkg"
@@ -41,6 +42,65 @@ func (s *Server) FileGetHandler(c echo.Context) error {
 		}
 	}
 	return c.JSON(http.StatusOK, file)
+}
+
+func (s *Server) UpdateFile(c echo.Context) error {
+	sha256 := strings.ToLower(c.Param("sha256"))
+	matched, _ := regexp.MatchString(regex, sha256)
+	if !matched {
+		return c.JSON(http.StatusBadRequest, schema.FileResponse{
+			Message:     "sha256 포멧이 아닙니다",
+			Description: "잘못된 hash 요청입니다 : " + sha256,
+		})
+	}
+	b, err := ioutil.ReadAll(c.Request().Body)
+	ctx := context.Background()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+	file, err := s.ms.FileSearch(ctx, sha256)
+	if err != nil {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			return c.JSON(http.StatusOK, schema.FileResponse{
+				Sha256:      sha256,
+				Message:     err.Error(),
+				Description: "파일을 찾을 수 없습니다",
+			})
+		}
+	}
+	err = json.Unmarshal(b, &file)
+	if err != nil {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
+				Sha256:      sha256,
+				Message:     err.Error(),
+				Description: "작업 중 에러가 발생하였습니다",
+			})
+		}
+	}
+
+	_, alreadyScanned := file.MultiAV["last_scan"]
+	if alreadyScanned {
+		_, ok := file.MultiAV["first_scan"]
+		if !ok {
+			file.MultiAV["first_scan"] = file.MultiAV["last_scan"]
+		}
+	}
+
+	file, err = s.ms.FileUpdate(ctx, file)
+	if err != nil {
+		if !errors.Is(err, mongo.ErrNoDocuments) {
+			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
+				Sha256:      sha256,
+				Message:     err.Error(),
+				Description: "업데이트 중 에러가 발생하였습니다",
+			})
+		}
+	}
+	return c.JSON(http.StatusOK, schema.FileResponse{
+		Message:     "DB update succeed",
+		Description: "DB 에 정상적으로 업데이트 완료",
+	})
 }
 
 func (s *Server) UploadFile(c echo.Context) error {

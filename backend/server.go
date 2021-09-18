@@ -68,6 +68,6 @@ func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Min
 func (s *Server) RegisterHandlers() {
 	api := s.Group("/api")
 	api.GET("/file/:sha256", s.FileGetHandler)
+	api.PUT("/file/:sha256", s.UpdateFile)
 	api.POST("/file", s.UploadFile)
-	api.PUT("/file", s.FileGetHandler)
 }

@@ -1,6 +1,7 @@
 package schema
 
 import (
+	"github.com/saferwall/pe"
 	"time"
 )
 
@@ -29,7 +30,6 @@ type File struct {
 	Magic            string                 `json:"magic,omitempty"`
 	Size             int64                  `json:"size,omitempty"`
 	Exif             map[string]string      `json:"exif,omitempty"`
-	TriD             []string               `json:"trid,omitempty"`
 	Tags             map[string]interface{} `json:"tags,omitempty"`
 	Packer           []string               `json:"packer,omitempty"`
 	FirstSubmission  *time.Time             `json:"first_submission,omitempty"`
@@ -37,17 +37,17 @@ type File struct {
 	LastScanned      *time.Time             `json:"last_scanned,omitempty"`
 	Submissions      []Submission           `json:"submissions,omitempty"`
 	SubmissionsCount int64                  `json:"submissions_count"`
-	// Strings         []stringStruct         `json:"strings,omitempty"`
-	MultiAV map[string]interface{} `json:"multiav,omitempty"`
-	Status  int                    `json:"status,omitempty"`
+	Strings          []StringStruct         `json:"strings,omitempty"`
+	MultiAV          map[string]interface{} `json:"multiav,omitempty"`
+	Status           int                    `json:"status,omitempty"`
+	PE               *pe.File               `json:"pe,omitempty"`
+	Histogram        []int                  `json:"histogram,omitempty"`
+	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
+	Type             string                 `json:"type,omitempty"`
 	// Comments        []Comment              `json:"comments,omitempty"`
-	// PE              *peparser.File         `json:"pe,omitempty"`
-	Histogram   []int  `json:"histogram,omitempty"`
-	ByteEntropy []int  `json:"byte_entropy,omitempty"`
-	Type        string `json:"type,omitempty"`
 }
 
-type stringStruct struct {
+type StringStruct struct {
 	Encoding string `json:"encoding"`
 	Value    string `json:"value"`
 }
@@ -62,17 +62,16 @@ type Result struct {
 	Magic       string                 `json:"magic,omitempty"`
 	Size        int64                  `json:"size,omitempty"`
 	Exif        map[string]string      `json:"exif,omitempty"`
-	TriD        []string               `json:"trid,omitempty"`
 	Tags        map[string]interface{} `json:"tags,omitempty"`
 	Packer      []string               `json:"packer,omitempty"`
 	LastScanned *time.Time             `json:"last_scanned,omitempty"`
-	Strings     []stringStruct         `json:"strings,omitempty"`
+	Strings     []StringStruct         `json:"strings,omitempty"`
 	MultiAV     map[string]interface{} `json:"multiav,omitempty"`
 	Status      int                    `json:"status,omitempty"`
-	// PE          *peparser.File         `json:"pe,omitempty"`
-	Histogram   []int  `json:"histogram,omitempty"`
-	ByteEntropy []int  `json:"byte_entropy,omitempty"`
-	Type        string `json:"type,omitempty"`
+	PE          *pe.File               `json:"pe,omitempty"`
+	Histogram   []int                  `json:"histogram,omitempty"`
+	ByteEntropy []int                  `json:"byte_entropy,omitempty"`
+	Type        string                 `json:"type,omitempty"`
 }
 
 var SigMap = map[string]string{

@@ -1,6 +1,6 @@
 # Friday <br/>
 ### ⭐ Malware analysis system
-####How to run?
+#### How to run?
 `friday server` webserver
 <br>
 `friday engine` engine server
@@ -8,6 +8,5 @@
 ### required installation
 - #### rabiitmq
 - #### minio
-<br>
-#### How to complie?
+### How to complie?
 `go build .`

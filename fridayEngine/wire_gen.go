@@ -49,7 +49,19 @@ func InitializeServer(ctx context.Context, cfg *viper.Viper) (*Server, func(), e
 		cleanup()
 		return nil, nil, err
 	}
-	server := NewServer(serverConfig, mongo, rabbitMq, minio)
+	yaraConfig, err := pkg.ProvideYaraConfig(cfg)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	yara, err := pkg.NewYara(yaraConfig)
+	if err != nil {
+		cleanup2()
+		cleanup()
+		return nil, nil, err
+	}
+	server := NewServer(serverConfig, mongo, rabbitMq, minio, yara)
 	return server, func() {
 		cleanup2()
 		cleanup()

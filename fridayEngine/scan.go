@@ -1,6 +1,7 @@
 package fridayEngine
 
 import (
+	"github.com/hillu/go-yara/v4"
 	"github.com/kuno989/friday/backend/schema"
 	"github.com/kuno989/friday/fridayEngine/utils"
 	"github.com/kuno989/friday/fridayEngine/utils/exif"
@@ -78,12 +79,34 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 	}
 	logrus.Infof("tags extraction finish")
 
+	matches, err := s.yaraScanFile(path)
+	if err != nil {
+		logrus.Errorf("yara scan failed %s", err)
+	}
+	res.Yara = make([]string, 0, len(matches))
+	for _, match := range matches {
+		res.Yara = append(res.Yara, match.Rule)
+	}
+
+	logrus.Infof("yara scan finish")
+
 	s.parseFile(b, path, res)
 	file, err := s.parser(path)
 	if err != nil {
 		logrus.Errorf("pe parsing failed %s", err)
 	}
 	s.getTags(file, res)
+}
+
+func (s *Server) yaraScanFile(path string) ([]yara.MatchRule, error) {
+	rules := s.yara.Load
+	scan, err := yara.NewScanner(rules)
+	if err != nil {
+		return nil, err
+	}
+	var m yara.MatchRules
+	err = scan.SetCallback(&m).ScanFile(path)
+	return m, err
 }
 
 func (s *Server) parser(path string) (*pe.File, error) {
@@ -106,15 +129,17 @@ func (s *Server) parser(path string) (*pe.File, error) {
 func (s *Server) getTags(file *pe.File, res *schema.Result) {
 	var tags []string
 	res.Tags = map[string]interface{}{}
-	if file.IsEXE() {
-		tags = append(tags, "exe")
-	} else if file.IsDriver() {
-		tags = append(tags, "sys")
-	} else if file.IsDLL() {
-		tags = append(tags, "dll")
-	}
-	if tags != nil {
-		res.Tags[res.Type] = tags
+	if file != nil {
+		if file.IsEXE() {
+			tags = append(tags, "exe")
+		} else if file.IsDriver() {
+			tags = append(tags, "sys")
+		} else if file.IsDLL() {
+			tags = append(tags, "dll")
+		}
+		if tags != nil {
+			res.Tags[res.Type] = tags
+		}
 	}
 }
 
@@ -175,6 +200,6 @@ func parsePE(filePath string) (*pe.File, error) {
 	defer pe.Close()
 	// Parse the PE.
 	err = pe.Parse()
-	logrus.Debug("pe pkg success")
+	logrus.Info("pe pkg success")
 	return pe, err
 }

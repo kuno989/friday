@@ -44,6 +44,7 @@ type File struct {
 	Histogram        []int                  `json:"histogram,omitempty"`
 	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
 	Type             string                 `json:"type,omitempty"`
+	Yara             []string               `json:"yara,omitempty"`
 	// Comments        []Comment              `json:"comments,omitempty"`
 }
 
@@ -72,6 +73,7 @@ type Result struct {
 	Histogram   []int                  `json:"histogram,omitempty"`
 	ByteEntropy []int                  `json:"byte_entropy,omitempty"`
 	Type        string                 `json:"type,omitempty"`
+	Yara        []string               `json:"yara,omitempty"`
 }
 
 var SigMap = map[string]string{

@@ -42,6 +42,7 @@ type Server struct {
 	Rb     *pkg.RabbitMq
 	ms     *pkg.Mongo
 	minio  *pkg.Minio
+	yara   *pkg.Yara
 }
 
 const (
@@ -50,12 +51,13 @@ const (
 	finished   = iota
 )
 
-func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Minio) *Server {
+func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Minio, yara *pkg.Yara) *Server {
 	s := &Server{
 		Config: cfg,
 		Rb:     rb,
 		ms:     ms,
 		minio:  minio,
+		yara:   yara,
 	}
 	return s
 }
@@ -92,10 +94,6 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	}
 	s.updateDocument(resp.Sha256, buff)
 
-	res.Status = finished
-	now := time.Now().UTC()
-	res.LastScanned = &now
-
 	//machine, err := virtualbox.GetMachine("win7")
 	//if err != nil {
 	//	logrus.Errorf("can not find machine %s", err)
@@ -112,6 +110,14 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	//	logrus.Errorf("machine save failure %s", err)
 	//}
 	//logrus.Infof("%s sandbox saved", machine.Name)
+
+	res.Status = finished
+	now := time.Now().UTC()
+	res.LastScanned = &now
+	if buff, err = json.Marshal(res); err != nil {
+		logrus.Errorf("Failed to json marshall object: %v ", err)
+	}
+	s.updateDocument(resp.Sha256, buff)
 
 	return nil
 }

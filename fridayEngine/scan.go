@@ -178,9 +178,6 @@ func (s *Server) parseFile(b []byte, filePath string, res *schema.Result) {
 		if err != nil {
 			logrus.Errorf("pe parser failed: %v", err)
 		}
-		//res.Histogram = bs.ByteHistogram(b)
-		//res.ByteEntropy = bs.ByteEntropyHistogram(b)
-		//logrus.Debug("bytestats pkg success")
 	}
 }
 

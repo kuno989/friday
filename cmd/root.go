@@ -34,5 +34,4 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is logger.yml)")
 	rootCmd.AddCommand(runBackend)
 	rootCmd.AddCommand(runFridayEngine)
-	rootCmd.AddCommand(runAgent)
 }

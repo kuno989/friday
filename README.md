@@ -6,8 +6,8 @@
 `friday engine` engine server
 <br>
 ### required installation
-- ####rabiitmq
-- ####minio
+- #### rabiitmq
+- #### minio
 <br>
-####How to complie?
+#### How to complie?
 `go build .`

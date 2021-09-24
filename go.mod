@@ -19,6 +19,7 @@ require (
 	github.com/glaslos/ssdeep v0.3.1 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
 	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
@@ -57,12 +58,18 @@ require (
 	github.com/youmark/pkcs8 v0.0.0-20181117223130-1be2e3e5546d // indirect
 	go.mongodb.org/mongo-driver v1.7.2 // indirect
 	go.mozilla.org/pkcs7 v0.0.0-20210826202110-33d05740a352 // indirect
+	go.uber.org/atomic v1.9.0 // indirect
+	go.uber.org/multierr v1.7.0 // indirect
+	go.uber.org/zap v1.19.1 // indirect
 	golang.org/x/crypto v0.0.0-20210915214749-c084706c2272 // indirect
-	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
+	golang.org/x/net v0.0.0-20210924054057-cf34111cab4d // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
-	golang.org/x/sys v0.0.0-20210917161153-d61c044b1678 // indirect
-	golang.org/x/text v0.3.6 // indirect
+	golang.org/x/sys v0.0.0-20210923061019-b8560ed6a9b7 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	golang.org/x/time v0.0.0-20201208040808-7e3f01d25324 // indirect
+	google.golang.org/genproto v0.0.0-20210924002016-3dee208752a0 // indirect
+	google.golang.org/grpc v1.40.0 // indirect
+	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

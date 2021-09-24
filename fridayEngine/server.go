@@ -28,7 +28,10 @@ type ServerConfig struct {
 	Debug         bool   `mapstructure:"debug"`
 	TempPath      string `mapstructure:"volume"`
 	URI           string `mapstructure:"uri"`
+	AgentURI      string `mapstructure:"agent_uri"`
 	WebserverPort string `mapstructure:"webserver_port"`
+	AgentPort     string `mapstructure:"agent_port"`
+	GrpcUrI       string `mapstructure:"grpc_uri"`
 	VmName        string `mapstructure:"vm_name"`
 }
 
@@ -69,7 +72,7 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	if err := json.Unmarshal(body, &resp); err != nil {
 		return errors.New("ailed to parse message body")
 		if err := msg.Reject(false); err != nil {
-			logrus.Errorf("failed to reject message %s", err)
+			logrus.Errorf("failed to reject message %v", err)
 		}
 	}
 	filePath := filepath.Join(s.Config.TempPath, resp.Sha256)
@@ -89,6 +92,12 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	res.Status = processing
 
 	s.defaultScan(filePath, &res)
+	logrus.Info("static scan finished")
+	s.vmRequest(resp.MinioObjectKey, resp.Sha256, "download")
+	logrus.Info("send malware sample")
+	s.vmRequest(resp.MinioObjectKey, resp.Sha256, "start")
+	logrus.Info("vm malware analysis start")
+
 	var buff []byte
 	if buff, err = json.Marshal(res); err != nil {
 		logrus.Errorf("Failed to json marshall object: %v ", err)

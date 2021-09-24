@@ -1,8 +1,12 @@
 package fridayEngine
 
 import (
+	"fmt"
 	"github.com/hillu/go-yara/v4"
 	"github.com/kuno989/friday/backend/schema"
+	"github.com/kuno989/friday/fridayEngine/grpc/avs"
+	comodo_client "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/client"
+	comodo_api "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/proto"
 	"github.com/kuno989/friday/fridayEngine/utils"
 	"github.com/kuno989/friday/fridayEngine/utils/exif"
 	"github.com/kuno989/friday/fridayEngine/utils/magic"
@@ -26,16 +30,16 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 	logrus.Infof("file hashing finished ")
 	magic, err := magic.Scan(path)
 	if err != nil {
-		logrus.Errorf("magic scan failed with %s", err)
+		logrus.Errorf("magic scan failed with %v", err)
 	}
 	res.Magic = magic
 	packerRes, err := packer.Scan(path)
 	if err != nil {
-		logrus.Errorf("packer scan failed with %s", err)
+		logrus.Errorf("packer scan failed with %v", err)
 	}
 	exif, err := exif.Scan(path)
 	if err != nil {
-		logrus.Errorf("exif scan failed with %s", err)
+		logrus.Errorf("exif scan failed with %v", err)
 	}
 	res.Exif = exif
 
@@ -81,7 +85,7 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 
 	matches, err := s.yaraScanFile(path)
 	if err != nil {
-		logrus.Errorf("yara scan failed %s", err)
+		logrus.Errorf("yara scan failed %v", err)
 	}
 	res.Yara = make([]string, 0, len(matches))
 	for _, match := range matches {
@@ -89,13 +93,33 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 	}
 
 	logrus.Infof("yara scan finish")
-
 	s.parseFile(b, path, res)
 	file, err := s.parser(path)
 	if err != nil {
-		logrus.Errorf("pe parsing failed %s", err)
+		logrus.Errorf("pe parsing failed %v", err)
 	}
 	s.getTags(file, res)
+
+	comodoChan := make(chan avs.ScanResult)
+	s.avScan("comodo", path, comodoChan)
+}
+
+func (s *Server) avScan(engine, path string, c chan avs.ScanResult) {
+	connect, err := avs.GetClientConn(s.Config.GrpcUrI)
+	if err != nil {
+		logrus.Errorf("grpc client connect [%s]: %v", engine, err)
+		c <- avs.ScanResult{}
+		return
+	}
+	defer connect.Close()
+
+	res := avs.ScanResult{}
+
+	switch engine {
+	case "comodo":
+		res, err = comodo_client.ScanFile(comodo_api.NewComodoScannerClient(connect), path)
+	}
+	fmt.Println(path, res, err)
 }
 
 func (s *Server) yaraScanFile(path string) ([]yara.MatchRule, error) {

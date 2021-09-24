@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"time"
 )
@@ -50,4 +51,25 @@ func StringInSlice(a string, list []string) bool {
 		}
 	}
 	return false
+}
+
+func ReadAll(filePath string) ([]byte, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	fileinfo, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	filesize := fileinfo.Size()
+	buffer := make([]byte, filesize)
+
+	_, err = file.Read(buffer)
+	if err != nil {
+		return nil, err
+	}
+	return buffer, nil
 }

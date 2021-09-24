@@ -76,6 +76,11 @@ type Result struct {
 	Yara        []string               `json:"yara,omitempty"`
 }
 
+type RequestMalware struct {
+	ObjectKey string `json:"minio_object_key,omitempty"`
+	Sha256    string `json:"sha256,omitempty"`
+}
+
 var SigMap = map[string]string{
 	"Nullsoft Scriptable Install System": "nsis",
 	"Inno Setup":                         "innosetup",

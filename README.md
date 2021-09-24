@@ -8,5 +8,7 @@
 ### required installation
 - #### rabiitmq
 - #### minio
+- #### yara
+- #### Capstone disassembly library
 ### How to complie?
 `go build .`

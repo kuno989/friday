@@ -25,8 +25,6 @@ func RunCommand(name string, arg ...string) (string, error) {
 		return "", err
 	}
 
-	fmt.Println(string(out))
-
 	return string(out), nil
 }
 

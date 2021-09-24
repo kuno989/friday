@@ -29,6 +29,7 @@ type ServerConfig struct {
 	TempPath      string `mapstructure:"volume"`
 	URI           string `mapstructure:"uri"`
 	WebserverPort string `mapstructure:"webserver_port"`
+	VmName        string `mapstructure:"vm_name"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {

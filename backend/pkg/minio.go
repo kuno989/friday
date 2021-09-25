@@ -15,10 +15,8 @@ import (
 
 var (
 	DefaultMinioConfig = MinioConfig{
-		URI:       "localhost:9000",
-		AccessKey: "",
-		SecretKey: "",
-		Bucket:    "malwares",
+		URI:    "localhost:9000",
+		Bucket: "malwares",
 	}
 	MinioProviderSet = wire.NewSet(NewMinio, ProvideMinioConfig)
 )
@@ -63,7 +61,7 @@ func (m Minio) Upload(ctx context.Context, fileInfo *multipart.FileHeader) (mini
 	content, err := ioutil.ReadAll(file)
 	contentType := http.DetectContentType(content)
 	buf := bytes.NewBuffer(content)
-	info, err := m.Client.PutObject(ctx, m.Config.Bucket, "sample/"+fileInfo.Filename, buf, fileInfo.Size, miniogo.PutObjectOptions{
+	info, err := m.Client.PutObject(ctx, m.Config.Bucket, fileInfo.Filename, buf, fileInfo.Size, miniogo.PutObjectOptions{
 		ContentType: contentType,
 	})
 	if err != nil {

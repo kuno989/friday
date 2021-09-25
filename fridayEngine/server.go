@@ -90,13 +90,12 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 
 	res := schema.Result{}
 	res.Status = processing
-
 	s.defaultScan(filePath, &res)
-	logrus.Info("static scan finished")
-	s.vmRequest(resp.MinioObjectKey, resp.Sha256, "download")
-	logrus.Info("send malware sample")
-	s.vmRequest(resp.MinioObjectKey, resp.Sha256, "start")
-	logrus.Info("vm malware analysis start")
+	logrus.Info("Scan finished")
+	//s.vmRequest(resp.MinioObjectKey, resp.Sha256, "download")
+	//logrus.Info("send malware sample")
+	//s.vmRequest(resp.MinioObjectKey, resp.Sha256, "start")
+	//logrus.Info("vm malware analysis start")
 
 	var buff []byte
 	if buff, err = json.Marshal(res); err != nil {

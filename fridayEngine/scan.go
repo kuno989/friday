@@ -1,12 +1,8 @@
 package fridayEngine
 
 import (
-	"fmt"
 	"github.com/hillu/go-yara/v4"
 	"github.com/kuno989/friday/backend/schema"
-	"github.com/kuno989/friday/fridayEngine/grpc/avs"
-	comodo_client "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/client"
-	comodo_api "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/proto"
 	"github.com/kuno989/friday/fridayEngine/utils"
 	"github.com/kuno989/friday/fridayEngine/utils/exif"
 	"github.com/kuno989/friday/fridayEngine/utils/magic"
@@ -100,26 +96,9 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 	}
 	s.getTags(file, res)
 
-	comodoChan := make(chan avs.ScanResult)
-	s.avScan("comodo", path, comodoChan)
-}
-
-func (s *Server) avScan(engine, path string, c chan avs.ScanResult) {
-	connect, err := avs.GetClientConn(s.Config.GrpcUrI)
-	if err != nil {
-		logrus.Errorf("grpc client connect [%s]: %v", engine, err)
-		c <- avs.ScanResult{}
-		return
-	}
-	defer connect.Close()
-
-	res := avs.ScanResult{}
-
-	switch engine {
-	case "comodo":
-		res, err = comodo_client.ScanFile(comodo_api.NewComodoScannerClient(connect), path)
-	}
-	fmt.Println(path, res, err)
+	avScanResults := s.parallelAvScan(path)
+	res.MultiAV = map[string]interface{}{}
+	res.MultiAV["last_scan"] = avScanResults
 }
 
 func (s *Server) yaraScanFile(path string) ([]yara.MatchRule, error) {

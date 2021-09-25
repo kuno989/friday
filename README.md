@@ -10,5 +10,6 @@
 - #### minio
 - #### yara
 - #### Capstone disassembly library
+- #### docker [to be added later]
 ### How to complie?
 `go build .`

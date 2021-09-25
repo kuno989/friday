@@ -98,6 +98,4 @@ RUN echo "Install Go..." \
      && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /go /usr/local/go
 
 WORKDIR /malware
-#삭제 예정
-EXPOSE 8888
 ENTRYPOINT ["/bin/friday","server"]

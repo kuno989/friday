@@ -15,10 +15,8 @@ import (
 
 var (
 	DefaultMongoConfig = MongoConfig{
-		URI:            "mongodb://localhost",
-		DB:             "",
-		FileCollection: "",
-		BcryptCost:     10,
+		URI:        "mongodb://localhost",
+		BcryptCost: 10,
 	}
 	MongoProviderSet = wire.NewSet(NewMongo, ProvideMongoConfig)
 )
@@ -27,8 +25,9 @@ type MongoConfig struct {
 	URI            string `mapstructure:"uri"`
 	DB             string `mapstructure:"db"`
 	FileCollection string `mapstructure:"file_collection"`
-	//DatabaseCollection string
-	BcryptCost int
+	User           string `mapstructure:"user"`
+	Password       string `mapstructure:"password"`
+	BcryptCost     int
 }
 
 func ProvideMongoConfig(cfg *viper.Viper) (MongoConfig, error) {
@@ -43,7 +42,11 @@ type Mongo struct {
 }
 
 func NewMongo(ctx context.Context, cfg MongoConfig) (*Mongo, func(), error) {
-	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.URI))
+	credential := options.Credential{
+		Username: cfg.User,
+		Password: cfg.Password,
+	}
+	client, err := mongo.NewClient(options.Client().ApplyURI(cfg.URI).SetAuth(credential))
 	if err != nil {
 		return nil, nil, err
 	}

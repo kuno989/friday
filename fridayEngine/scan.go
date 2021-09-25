@@ -43,11 +43,11 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 	n := 10
 	asciiStrings := utils.GetASCIIStrings(b, n)
 	wideStrings := utils.GetUnicodeStrings(b, n)
-	asmStrings := utils.GetAsmStrings(b)
+	//asmStrings := utils.GetAsmStrings(b)
 	// 중복 제거
 	uniqueASCII := utils.UniqueSlice(asciiStrings)
 	uniqueWide := utils.UniqueSlice(wideStrings)
-	uniqueAsm := utils.UniqueSlice(asmStrings)
+	//uniqueAsm := utils.UniqueSlice(asmStrings)
 	var strResults []schema.StringStruct
 	for _, str := range uniqueASCII {
 		strResults = append(strResults, schema.StringStruct{"ascii", str})
@@ -57,9 +57,9 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 		strResults = append(strResults, schema.StringStruct{"wide", str})
 	}
 
-	for _, str := range uniqueAsm {
-		strResults = append(strResults, schema.StringStruct{"asm", str})
-	}
+	//for _, str := range uniqueAsm {
+	//	strResults = append(strResults, schema.StringStruct{"asm", str})
+	//}
 	res.Strings = strResults
 	logrus.Infof("strings extraction finish")
 	res.Packer = packerRes

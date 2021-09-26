@@ -8,7 +8,7 @@ import (
 
 var (
 	DefaultRabbitMqConfig = RabbitMqConfig{
-		URI:           "amqp://guest:guest@localhost:5672/",
+		URI:           "amqp://guest:guest@message-broker:5672/",
 		FileScanQueue: "fileScan",
 	}
 	RabbitmqProviderSet = wire.NewSet(NewRabbitMq, ProvideRabbitMqConfig)

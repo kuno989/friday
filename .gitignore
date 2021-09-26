@@ -35,3 +35,4 @@ docker-compose.yml
 starter.txt
 temp
 api/
+yara_rule/

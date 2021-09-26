@@ -25,14 +25,14 @@ var (
 )
 
 type ServerConfig struct {
-	Debug         bool   `mapstructure:"debug"`
-	TempPath      string `mapstructure:"volume"`
-	URI           string `mapstructure:"uri"`
-	AgentURI      string `mapstructure:"agent_uri"`
-	WebserverPort string `mapstructure:"webserver_port"`
-	AgentPort     string `mapstructure:"agent_port"`
-	GrpcUrI       string `mapstructure:"grpc_uri"`
-	VmName        string `mapstructure:"vm_name"`
+	Debug         bool              `mapstructure:"debug"`
+	TempPath      string            `mapstructure:"volume"`
+	URI           string            `mapstructure:"uri"`
+	AgentURI      string            `mapstructure:"agent_uri"`
+	WebserverPort string            `mapstructure:"webserver_port"`
+	AgentPort     string            `mapstructure:"agent_port"`
+	VmName        string            `mapstructure:"vm_name"`
+	AVConfig      map[string]string `mapstructure:"av"`
 }
 
 func ProvideServerConfig(cfg *viper.Viper) (ServerConfig, error) {

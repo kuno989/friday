@@ -158,7 +158,7 @@ func (s *Server) UploadFile(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, schema.FileResponse{
 				Message:     "파일 업로드 실패",
-				Description: "Internal error",
+				Description: err.Error(),
 				FileName:    responseFile.Filename,
 				FileSize:    responseFile.Size,
 			})

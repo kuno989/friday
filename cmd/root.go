@@ -9,8 +9,8 @@ import (
 var (
 	cfgFile string
 	rootCmd = &cobra.Command{
-		Use:   "fridayEngine",
-		Short: "fridayEngine",
+		Use:   "friday",
+		Short: "friday",
 		PersistentPreRun: func(cmd *cobra.Command, args []string) {
 			if cfgFile != "" {
 				viper.SetConfigFile(cfgFile)
@@ -31,7 +31,7 @@ func Execute() error {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is logger.yml)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is config.yml)")
 	rootCmd.AddCommand(runBackend)
 	rootCmd.AddCommand(runFridayEngine)
 }

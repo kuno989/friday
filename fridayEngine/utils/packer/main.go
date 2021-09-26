@@ -5,7 +5,8 @@ import (
 	"strings"
 )
 
-const tools = "/Applications/die.app/Contents/MacOS/diec"
+//const tools = "/Applications/die.app/Contents/MacOS/diec"
+const tools = "/opt/die/diec.sh"
 
 func Scan(path string) ([]string, error) {
 	args := []string{path}

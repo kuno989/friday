@@ -78,6 +78,7 @@ ENV GO111MODULE on
 WORKDIR /friday
 COPY . /go/src/github.com/kuno989/friday
 COPY config.yml .
+COPY ./yara_rule /friday/yara_rule/
 RUN echo "Install Go..." \
      && ARCH="$(dpkg --print-architecture)" \
      && wget https://golang.org/dl/go$GO_VERSION.linux-$ARCH.tar.gz -O /tmp/go.tar.gz \

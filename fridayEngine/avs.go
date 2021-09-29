@@ -7,6 +7,8 @@ import (
 	clamav_api "github.com/kuno989/friday/fridayEngine/grpc/avs/clamav/proto"
 	comodo_client "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/client"
 	comodo_api "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/proto"
+	windefender_client "github.com/kuno989/friday/fridayEngine/grpc/avs/windefender/client"
+	windefender_api "github.com/kuno989/friday/fridayEngine/grpc/avs/windefender/proto"
 	"github.com/kuno989/friday/fridayEngine/utils"
 	"github.com/sirupsen/logrus"
 	"runtime/debug"
@@ -41,6 +43,8 @@ func (s *Server) avScan(engine, path string, c chan avs.ScanResult) {
 		res, err = comodo_client.ScanFile(comodo_api.NewComodoScannerClient(connect), path)
 	case "clamav":
 		res, err = clamav_client.ScanFile(clamav_api.NewClamAVScannerClient(connect), path)
+	case "windefender":
+		res, err = windefender_client.ScanFile(windefender_api.NewWinDefenderScannerClient(connect), path)
 	}
 
 	if err != nil {
@@ -60,12 +64,14 @@ func (s *Server) parallelAvScan(path string) map[string]interface{} {
 
 	comodoChannel := make(chan avs.ScanResult)
 	clamavChannel := make(chan avs.ScanResult)
+	winChannel := make(chan avs.ScanResult)
 
 	go s.avScan("comodo", path, comodoChannel)
 	go s.avScan("clamav", path, clamavChannel)
+	go s.avScan("windefender", path, winChannel)
 
 	avScanResults := map[string]interface{}{}
-	engineCounts := 2
+	engineCounts := 3
 	count := 0
 	for {
 		select {
@@ -74,6 +80,9 @@ func (s *Server) parallelAvScan(path string) map[string]interface{} {
 			count++
 		case clamavResponse := <-clamavChannel:
 			avScanResults["clamav"] = clamavResponse
+			count++
+		case windefenderResponse := <-winChannel:
+			avScanResults["windefender"] = windefenderResponse
 			count++
 		}
 		if count == engineCounts {

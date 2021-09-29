@@ -6,6 +6,7 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"time"
 )
 
@@ -141,4 +142,8 @@ func DeleteFile(path string) error {
 		return err
 	}
 	return nil
+}
+
+func Getwd() (string, error) {
+	return filepath.Abs(filepath.Dir(os.Args[0]))
 }

@@ -16,14 +16,6 @@ type Result struct {
 	Output   string `json:"output"`
 }
 
-func GetVersion() (string, error) {
-	version, err := utils.ReadAll(comodover)
-	if err != nil {
-		return "", err
-	}
-	return string(version), nil
-}
-
 func ScanFile(path string) (Result, error) {
 	cmd, err := utils.CMD(cmdscan, "-v", "-s", path)
 	if err != nil {
@@ -42,4 +34,12 @@ func ScanFile(path string) (Result, error) {
 	res.Output = detection[len(detection)-1]
 	res.Infected = true
 	return res, nil
+}
+
+func GetVersion() (string, error) {
+	version, err := utils.ReadAll(comodover)
+	if err != nil {
+		return "", err
+	}
+	return string(version), nil
 }

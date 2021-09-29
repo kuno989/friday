@@ -3,6 +3,8 @@ package fridayEngine
 import (
 	"fmt"
 	"github.com/kuno989/friday/fridayEngine/grpc/avs"
+	clamav_client "github.com/kuno989/friday/fridayEngine/grpc/avs/clamav/client"
+	clamav_api "github.com/kuno989/friday/fridayEngine/grpc/avs/clamav/proto"
 	comodo_client "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/client"
 	comodo_api "github.com/kuno989/friday/fridayEngine/grpc/avs/comodo/proto"
 	"github.com/kuno989/friday/fridayEngine/utils"
@@ -37,6 +39,8 @@ func (s *Server) avScan(engine, path string, c chan avs.ScanResult) {
 	switch engine {
 	case "comodo":
 		res, err = comodo_client.ScanFile(comodo_api.NewComodoScannerClient(connect), path)
+	case "clamav":
+		res, err = clamav_client.ScanFile(clamav_api.NewClamAVScannerClient(connect), path)
 	}
 
 	if err != nil {
@@ -53,17 +57,23 @@ func (s *Server) avScan(engine, path string, c chan avs.ScanResult) {
 }
 
 func (s *Server) parallelAvScan(path string) map[string]interface{} {
+
 	comodoChannel := make(chan avs.ScanResult)
+	clamavChannel := make(chan avs.ScanResult)
+
 	go s.avScan("comodo", path, comodoChannel)
+	go s.avScan("clamav", path, clamavChannel)
 
 	avScanResults := map[string]interface{}{}
-	engineCounts := 1
+	engineCounts := 2
 	count := 0
-
 	for {
 		select {
 		case comodoResponse := <-comodoChannel:
 			avScanResults["comodo"] = comodoResponse
+			count++
+		case clamavResponse := <-clamavChannel:
+			avScanResults["clamav"] = clamavResponse
 			count++
 		}
 		if count == engineCounts {

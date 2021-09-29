@@ -94,11 +94,12 @@ func (s *Server) defaultScan(path string, res *schema.Result) {
 	if err != nil {
 		logrus.Errorf("pe parsing failed %v", err)
 	}
-	s.getTags(file, res)
 
 	avScanResults := s.parallelAvScan(path)
 	res.MultiAV = map[string]interface{}{}
 	res.MultiAV["last_scan"] = avScanResults
+
+	s.getTags(file, res)
 }
 
 func (s *Server) yaraScanFile(path string) ([]yara.MatchRule, error) {

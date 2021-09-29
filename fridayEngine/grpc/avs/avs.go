@@ -56,9 +56,9 @@ func Serve(s *grpc.Server, lis net.Listener) error {
 	return s.Serve(lis)
 }
 
-func GetClientConn(address string) (*grpc.ClientConn, error) {
+func GetClientConn(address, engine string) (*grpc.ClientConn, error) {
 	conn, err := grpc.Dial(
 		address, []grpc.DialOption{grpc.WithInsecure()}...)
-	logrus.Infof("friday grpc Server Running on localhost%s", port)
+	logrus.Infof("%s connected on %s", engine, port)
 	return conn, err
 }

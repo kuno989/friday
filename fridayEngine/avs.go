@@ -20,7 +20,7 @@ func (s *Server) avScan(engine, path string, c chan avs.ScanResult) {
 			logrus.Errorf("panic av scan %v", debug.Stack())
 		}
 	}()
-	connect, err := avs.GetClientConn(s.Config.AVConfig[engine])
+	connect, err := avs.GetClientConn(s.Config.AVConfig[engine], engine)
 	if err != nil {
 		logrus.Errorf("grpc client connect [%s]: %v", engine, err)
 		c <- avs.ScanResult{}

@@ -5,7 +5,7 @@
 | :------------------------------: | :----------------: |
 |            drweb                 | :white_check_mark: |
 |            comodo                | :white_check_mark: |
-|       window defense             | :white_check_mark: |
+|       windows defender           | :white_check_mark: |
 |            clamav                | :white_check_mark: |
 ### required installation
 - #### rabiitmq

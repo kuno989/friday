@@ -16,6 +16,6 @@
 ### How to complie?
 `go build .`
 ### How to run?
-`friday server` webserver &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[friday web &nbsp;&nbsp;&nbsp;&nbsp;서버]
+`friday server` webserver &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[friday web server]
 <br>
-`friday engine` engine server [friday engine 서버]
+`friday engine` engine server [friday engine server]

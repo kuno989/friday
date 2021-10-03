@@ -4,6 +4,7 @@
 |           Friday                                             |Status |
 | :----------------------------------------------------------: | :---: |
 |[Friday](https://github.com/kuno989/friday)                   |  WIP  |
+|[Friday Broker](https://github.com/kuno989/friday_broker)     |  WIP  |
 |[Friday Agent](https://github.com/kuno989/friday_agent)       |  WIP  |
 
 ### AV Included

@@ -104,12 +104,13 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	logrus.Info("Scan finished")
 
 	// static 분석작업 완료후 업데이트 [status 및 분석결과 업데이트]
-	if buff, err = json.Marshal(res); err != nil {
-		logrus.Errorf("Failed to json marshall object: %v ", err)
-	}
 	res.Status = finished
 	now := time.Now().UTC()
 	res.LastScanned = &now
+
+	if buff, err = json.Marshal(res); err != nil {
+		logrus.Errorf("Failed to json marshall object: %v ", err)
+	}
 	s.updateDocument(resp.Sha256, buff)
 
 	ch, err := s.Rb.Channel()
@@ -127,13 +128,6 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	}); err != nil {
 		logrus.Info("vm 작업 큐 등록 완료")
 	}
-
-	// friday connect 큐에 등록 후 업데이트 [status 변경]
-	res.Status = vmProcessing
-	if buff, err = json.Marshal(res); err != nil {
-		logrus.Errorf("Failed to json marshall object: %v ", err)
-	}
-	s.updateDocument(resp.Sha256, buff)
 
 	return nil
 }

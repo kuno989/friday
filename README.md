@@ -1,5 +1,11 @@
 # Friday <br/>
 ### ⭐ Malware analysis system
+
+|           Friday                                             |Status |
+| :----------------------------------------------------------: | :---: |
+|[Friday](https://github.com/kuno989/friday)                   |  WIP  |
+|[Friday Agent](https://github.com/kuno989/friday_agent)       |  WIP  |
+
 ### AV Included
 |              AV                  |       Status       |
 | :------------------------------: | :----------------: |

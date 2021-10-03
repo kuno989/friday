@@ -1,0 +1,30 @@
+debug: true
+uri: http://friday-server
+webserver_port: :8888
+agent_port: :8080
+agent_uri: http://192.168.56.20
+vm_name: win7
+volume: /samples #vbox shared folder
+#vbox_volume: \\VBOXSVR\temp_malwares
+av:
+  comodo: "comodo:50051"
+  clamav: "clamav:50051"
+  windefender: "windefender:50051"
+  drweb: "drweb:50051"
+yara:
+  rule_path: /friday/yara_rule
+rabbitmq:
+  uri: amqp://guest:guest@message-broker:5672/
+  fileQueue: fileScan
+mongo:
+  uri: mongodb://mongodb
+  db: friday
+  user: root
+  password: 1010z
+  file_collection: file
+minio:
+  endpoint: minio:9000
+  accessKey: minioadmin
+  secretKey: minioadmin
+  bucket: samples
+maxFileSize: 64000000

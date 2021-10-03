@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/google/wire"
 	"github.com/kuno989/friday/backend/pkg"
 	"github.com/kuno989/friday/backend/schema"
@@ -50,9 +51,10 @@ type Server struct {
 }
 
 const (
-	queued     = iota
-	processing = iota
-	finished   = iota
+	queued       = iota
+	processing   = iota
+	finished     = iota
+	vmProcessing = iota
 )
 
 func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Minio, yara *pkg.Yara) *Server {
@@ -90,39 +92,44 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 
 	res := schema.Result{}
 	res.Status = processing
-	s.defaultScan(filePath, &res)
-	logrus.Info("Scan finished")
-	//s.vmRequest(resp.MinioObjectKey, resp.Sha256, "download")
-	//logrus.Info("send malware sample")
-	//s.vmRequest(resp.MinioObjectKey, resp.Sha256, "start")
-	//logrus.Info("vm malware analysis start")
-
 	var buff []byte
+
+	// static 분석 작업 전 업데이트 [status 변경]
 	if buff, err = json.Marshal(res); err != nil {
 		logrus.Errorf("Failed to json marshall object: %v ", err)
 	}
 	s.updateDocument(resp.Sha256, buff)
 
-	//machine, err := virtualbox.GetMachine("win7")
-	//if err != nil {
-	//	logrus.Errorf("can not find machine %s", err)
-	//}
-	//logrus.Infof("%s sandbox found", machine.Name)
-	//logrus.Infof("cpu %v, memory %v", machine.CPUs, machine.Memory)
-	//
-	//if err := machine.Start(); err != nil {
-	//	logrus.Errorf("machine start failure %s", err)
-	//}
-	//logrus.Infof("%s sandbox start", machine.Name)
+	s.defaultScan(filePath, &res)
+	logrus.Info("Scan finished")
 
-	//if err := machine.Save(); err != nil {
-	//	logrus.Errorf("machine save failure %s", err)
-	//}
-	//logrus.Infof("%s sandbox saved", machine.Name)
-
+	// static 분석작업 완료후 업데이트 [status 및 분석결과 업데이트]
+	if buff, err = json.Marshal(res); err != nil {
+		logrus.Errorf("Failed to json marshall object: %v ", err)
+	}
 	res.Status = finished
 	now := time.Now().UTC()
 	res.LastScanned = &now
+	s.updateDocument(resp.Sha256, buff)
+
+	ch, err := s.Rb.Channel()
+	if err != nil {
+		logrus.Error("rabbitmq channel error", err)
+	}
+	defer ch.Close()
+
+	// friday connect 큐에 등록
+	// friday connect 에서 작업 실행
+	q, err := ch.QueueDeclare(s.Rb.Config.VmQueue, false, false, false, false, nil)
+	if err = ch.Publish("", q.Name, false, false, amqp.Publishing{
+		ContentType: "application/json",
+		Body:        []byte(fmt.Sprintf(`{"minio_object_key":"%s", "sha256":"%s", "file_type":"%s"}`, resp.MinioObjectKey, resp.Sha256, res.Type)),
+	}); err != nil {
+		logrus.Info("vm 작업 큐 등록 완료")
+	}
+
+	// friday connect 큐에 등록 후 업데이트 [status 변경]
+	res.Status = vmProcessing
 	if buff, err = json.Marshal(res); err != nil {
 		logrus.Errorf("Failed to json marshall object: %v ", err)
 	}

@@ -31,6 +31,7 @@ yarn-error.log*
 env.exe.stackdump
 config.yml
 config_test.yml
+config_docker.yml
 docker-compose.yml
 starter.txt
 temp

@@ -17,6 +17,7 @@ var (
 type RabbitMqConfig struct {
 	URI           string `mapstructure:"uri"`
 	FileScanQueue string `mapstructure:"fileScan"`
+	VmQueue       string `mapstructure:"vmQueue"`
 }
 
 func ProvideRabbitMqConfig(cfg *viper.Viper) (RabbitMqConfig, error) {

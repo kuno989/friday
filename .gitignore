@@ -30,8 +30,8 @@ yarn-error.log*
 .vscode/launch.json
 env.exe.stackdump
 config.yml
-config_test.yml
 config_docker.yml
+config_test.yml
 docker-compose.yml
 starter.txt
 temp

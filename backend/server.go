@@ -5,6 +5,7 @@ import (
 	"github.com/kuno989/friday/backend/pkg"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"net/http"
 
 	"github.com/spf13/viper"
 )
@@ -60,6 +61,7 @@ func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Min
 		AllowOrigins:     allowedOrigins,
 		AllowCredentials: true,
 		AllowHeaders:     []string{"Content-Type", "Authorization", "Access-Control-allow-Methods", "Access-Control-Allow-Origin", "Access-Control-Allow-Headers"},
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 	}))
 	s.RegisterHandlers()
 	return s
@@ -67,6 +69,7 @@ func NewServer(cfg ServerConfig, ms *pkg.Mongo, rb *pkg.RabbitMq, minio *pkg.Min
 
 func (s *Server) RegisterHandlers() {
 	api := s.Group("/api")
+	api.GET("/screenshot/:image", s.ImageProxy)
 	api.GET("/file/:sha256", s.FileGetHandler)
 	api.PUT("/file/:sha256", s.UpdateFile)
 	api.POST("/file", s.UploadFile)

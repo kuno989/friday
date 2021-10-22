@@ -44,6 +44,27 @@ func (s *Server) FileGetHandler(c echo.Context) error {
 	return c.JSON(http.StatusOK, file)
 }
 
+func (s *Server) ImageProxy(c echo.Context) error {
+	image := c.Param("image")
+	uri := fmt.Sprintf("http://%s/samples/%s", s.minio.Config.URI, image)
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(uri)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, schema.FileResponse{
+			Message:     "이미지를 찾을 수 없음 ",
+			Description: "요청 한 이미지를 찾을 수 없습니다",
+		})
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return c.JSON(http.StatusBadRequest, schema.FileResponse{
+			Message:     "이미지를 찾을 수 없음 ",
+			Description: "요청 한 이미지를 찾을 수 없습니다",
+		})
+	}
+	return c.Stream(http.StatusOK, "image/jpeg", resp.Body)
+}
+
 func (s *Server) UpdateFile(c echo.Context) error {
 	sha256 := strings.ToLower(c.Param("sha256"))
 	matched, _ := regexp.MatchString(regex, sha256)

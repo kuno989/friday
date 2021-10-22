@@ -104,6 +104,7 @@ func (s *Server) AmqpHandler(msg amqp.Delivery) error {
 	logrus.Info("Scan finished")
 
 	// static 분석작업 완료후 업데이트 [status 및 분석결과 업데이트]
+
 	res.Status = finished
 	now := time.Now().UTC()
 	res.LastScanned = &now

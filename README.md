@@ -3,9 +3,10 @@
 
 |           Friday                                             |Status |
 | :----------------------------------------------------------: | :---: |
-|[Friday](https://github.com/kuno989/friday)                   |  WIP  |
-|[Friday Broker](https://github.com/kuno989/friday_broker)     |  WIP  |
-|[Friday Agent](https://github.com/kuno989/friday_agent)       |  WIP  |
+|[Friday Server&Engine](https://github.com/kuno989/friday)                   |  :white_check_mark:  |
+|[Friday Broker](https://github.com/kuno989/friday_broker)     |  :white_check_mark:  |
+|[Friday Agent](https://github.com/kuno989/friday_agent)       |  :white_check_mark:  |
+|[Friday Front](https://github.com/kuno989/friday-frontend)    |  :white_check_mark:  |
 
 ### AV Included
 |              AV                  |       Status       |

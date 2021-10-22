@@ -45,7 +45,8 @@ type File struct {
 	ByteEntropy      []int                  `json:"byte_entropy,omitempty"`
 	Type             string                 `json:"type,omitempty"`
 	Yara             []string               `json:"yara,omitempty"`
-	// Comments        []Comment              `json:"comments,omitempty"`
+	IsNotPE          bool                   `json:"is_not_pe,omitempty"`
+	DBModel          DBModel                `json:"vm_detect,omitempty"`
 }
 
 type StringStruct struct {
